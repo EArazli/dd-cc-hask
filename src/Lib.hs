@@ -13,6 +13,7 @@ import Control.Category.Constrained.Prelude
 import qualified Control.Category.Hask as Hask
 import Control.Monad.Constrained
 import Data.Bifunctor (bimap)
+import Data.Tagged
 import Prelude ()
 
 infixl 6 ⊖, ⊕
@@ -45,6 +46,7 @@ instance Category Inc where
       (fgx, df) -> (fgx, df . dg)
 
 instance Cartesian Inc where
+  type UnitObject Inc = ()
   swap = Inc $ \(a, b) -> ((b, a), \(ax, bx) -> (bx, ax))
   attachUnit = Inc $ \a -> ((a, ()), (,()))
   detachUnit = Inc $ \(a, _) -> (a, fst)
@@ -65,3 +67,10 @@ instance PreArrow Inc where
   terminal = Inc $ const ((), const ())
   fst = Inc $ \(x, _) -> (x, fst)
   snd = Inc $ \(_, y) -> (y, snd)
+
+instance WellPointed Inc where
+  type PointObject Inc x = HasDelta x
+  unit :: CatTagged Inc (UnitObject Inc)
+  unit = Tagged ()
+  const :: (Object Inc b, ObjectPoint Inc x) => x -> Inc b x
+  const x = Inc $ const (x, const $ x ⊖ x)
