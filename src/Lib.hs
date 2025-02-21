@@ -5,6 +5,8 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module Lib () where
 
@@ -34,6 +36,11 @@ instance HasDelta () where
   type D () = ()
   () ⊕ () = ()
   () ⊖ () = ()
+
+instance HasDelta Double where
+  type D Double = Double
+  (⊕) = (+)
+  (⊖) = (-)
 
 newtype Inc x y = Inc (x -> (y, D x -> D y))
 
@@ -74,3 +81,24 @@ instance WellPointed Inc where
   unit = Tagged ()
   const :: (Object Inc b, ObjectPoint Inc x) => x -> Inc b x
   const x = Inc $ const (x, const $ x ⊖ x)
+
+instance HasAgent Inc where
+  type AgentVal Inc a v = GenericAgent Inc a v
+  alg = genericAlg
+  ($~) = genericAgentMap
+
+instance CartesianAgent Inc where
+  alg1to2 = genericAlg1to2
+  alg2to1 = genericAlg2to1
+  alg2to2 = genericAlg2to2
+
+instance (HasDelta x) => PointAgent (GenericAgent Inc) Inc a x where
+  point = genericPoint
+
+instance (HasDelta v, Num v, Ord v, D v ~ v) => Num (GenericAgent Inc a v) where
+  (+) = genericAgentCombine . Inc $ \(x, y) -> (x + y, uncurry (+))
+  (*) = genericAgentCombine . Inc $ \(x, y) -> (x * y, \(dx, dy) -> y * dx + x * dy)
+  abs = genericAgentMap . Inc $ \x -> (abs x, \dx -> if x < 0 then -dx else dx)
+  signum = genericAgentMap . Inc $ \x -> (signum x, \dx -> signum (x + dx))
+  fromInteger = point . fromInteger
+  negate = genericAgentMap . Inc $ \x -> (-x, \dx -> -dx)
