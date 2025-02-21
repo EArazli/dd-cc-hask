@@ -56,3 +56,12 @@ instance Morphism Inc where
     let (c, dc) = f a
         (d, dd) = g b
      in ((c, d), bimap dc dd)
+
+instance PreArrow Inc where
+  Inc f &&& Inc g = Inc $ \a ->
+    let (b, db) = f a
+        (c, dc) = g a
+     in ((b, c), \x -> (db x, dc x))
+  terminal = Inc $ const ((), const ())
+  fst = Inc $ \(x, _) -> (x, fst)
+  snd = Inc $ \(_, y) -> (y, snd)
