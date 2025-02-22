@@ -12,7 +12,7 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module GAD () where
+module GAD (Inc, D (..), DelX (..), HasDelta (..)) where
 
 import Control.Arrow.Constrained
 import Control.Category.Constrained.Prelude
@@ -30,8 +30,8 @@ instance (Category k) => Category (D k) where
   type Object (D k) a = Object k a
   id = linearD id id
   (D f) . (D g) =
-    D
-      $ \a ->
+    D $
+      \a ->
         let (ga, dg) = g a
             (fga, df) = f ga
          in (fga, df . dg)
@@ -64,27 +64,33 @@ instance (WellPointed k, UnitObject k ~ ()) => WellPointed (D k) where
   unit = Tagged ()
   const x = linearD (const x) (const x)
 
-infixl 6 ⊖, ⊕
+infixl 6 .+, .-
 
 class HasDelta a where
   type Delta a
   zero :: Delta a
-  (⊕) :: a -> Delta a -> a
-  (⊖) :: a -> a -> Delta a
+  (.+) :: a -> Delta a -> a
+  (.-) :: a -> a -> Delta a
 
 instance (HasDelta a, HasDelta b) => HasDelta (a, b) where
   type Delta (a, b) = (Delta a, Delta b)
-  (⊕) :: (a, b) -> Delta (a, b) -> (a, b)
-  (a, b) ⊕ (da, db) = (a ⊕ da, b ⊕ db)
-  (⊖) :: (a, b) -> (a, b) -> Delta (a, b)
-  (a, b) ⊖ (da, db) = (a ⊖ da, b ⊖ db)
+  (.+) :: (a, b) -> Delta (a, b) -> (a, b)
+  (a, b) .+ (da, db) = (a .+ da, b .+ db)
+  (.-) :: (a, b) -> (a, b) -> Delta (a, b)
+  (a, b) .- (da, db) = (a .- da, b .- db)
   zero = (zero @a, zero @b)
 
 instance HasDelta () where
   type Delta () = ()
-  () ⊕ () = ()
-  () ⊖ () = ()
+  () .+ () = ()
+  () .- () = ()
   zero = ()
+
+instance HasDelta Double where
+  type Delta Double = Double
+  (.+) = (+)
+  (.-) = (-)
+  zero = 0
 
 newtype DelX a b = DelX (Delta a -> Delta b)
 
@@ -127,3 +133,11 @@ instance CartesianAgent Inc where
 
 instance (HasDelta x {-TODO: ??-}) => PointAgent (GenericAgent Inc) Inc a x where
   point = genericPoint
+
+instance (HasDelta v, Num v, Ord v, Delta v ~ v) => Num (GenericAgent Inc a v) where
+  (+) = genericAgentCombine . D $ \(x, y) -> (x + y, DelX $ uncurry (+))
+  (*) = genericAgentCombine . D $ \(x, y) -> (x * y, DelX $ \(dx, dy) -> y * dx + x * dy)
+  abs = genericAgentMap . D $ \x -> (abs x, DelX $ \dx -> if x < 0 then -dx else dx)
+  signum = genericAgentMap . D $ \x -> (signum x, DelX $ \dx -> signum (x + dx))
+  fromInteger = point . fromInteger
+  negate = genericAgentMap . D $ \x -> (-x, DelX $ \dx -> -dx)
