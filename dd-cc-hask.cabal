@@ -25,6 +25,7 @@ source-repository head
 
 library
   exposed-modules:
+      GAD
       Lib
   other-modules:
       Paths_dd_cc_hask
