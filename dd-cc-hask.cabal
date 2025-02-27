@@ -27,6 +27,7 @@ library
   exposed-modules:
       GAD
       Lib
+      Template
   other-modules:
       Paths_dd_cc_hask
   autogen-modules:
