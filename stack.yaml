@@ -41,6 +41,7 @@ packages:
 #
 extra-deps: 
 - constrained-categories-0.4.2.0@sha256:b25f8a7d23e847dcaff2cba5c03bbe868f17485ef17acc82796a90bd5cadf406,3532
+- ../nice-html/.stack-work/dist/aarch64-osx/ghc-9.6.6/nice-html-0.4.1.tar.gz
 
 # Override default flag values for project packages and extra-deps
 # flags: {}

@@ -11,6 +11,17 @@ packages:
       size: 1125
   original:
     hackage: constrained-categories-0.4.2.0@sha256:b25f8a7d23e847dcaff2cba5c03bbe868f17485ef17acc82796a90bd5cadf406,3532
+- completed:
+    filepath: ../nice-html/.stack-work/dist/aarch64-osx/ghc-9.6.6/nice-html-0.4.1.tar.gz
+    name: nice-html
+    pantry-tree:
+      sha256: e6219033a11b59e46483f70805ba72ad92c70bf57d01c8ef89b88fb7d597d6cf
+      size: 1102
+    sha256: 5545c8a4eacda23ef38811d01bfa65a49a394688e2c2043988a1157dd946e56b
+    size: 16073
+    version: 0.4.1
+  original:
+    filepath: ../nice-html/.stack-work/dist/aarch64-osx/ghc-9.6.6/nice-html-0.4.1.tar.gz
 snapshots:
 - completed:
     sha256: 08bd13ce621b41a8f5e51456b38d5b46d7783ce114a50ab604d6bbab0d002146

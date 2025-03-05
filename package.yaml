@@ -23,6 +23,19 @@ dependencies:
 - base >= 4.7 && < 5
 - constrained-categories
 - tagged
+- warp
+- wai
+- http-types
+- blaze-builder
+- text
+- recursion-schemes
+- free
+- blaze-markup
+- bifunctors
+- transformers
+- deepseq
+- vector
+- nice-html
 
 build-depends:
 - tagged
